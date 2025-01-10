@@ -1,1 +1,0 @@
-Contracts compiled with solc v0.3.5-2016-06-10-5f97274.
