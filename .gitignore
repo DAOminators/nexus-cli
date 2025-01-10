@@ -30,3 +30,5 @@ artifacts/
 conotracts/artifacts/
 
 .deps/
+.venv/
+.env

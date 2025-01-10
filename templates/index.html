@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMask Connection</title>
+</head>
+<body>
+    <h1>Connect to MetaMask</h1>
+    <button id="connectButton">Connect Wallet</button>
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script>
+        const connectButton = document.getElementById('connectButton');
+
+        connectButton.addEventListener('click', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                const account = accounts[0];
+                console.log('Connected account:', account);
+
+                const web3 = new Web3(window.ethereum);
+                const networkId = await web3.eth.net.getId();
+                const networkName = await web3.eth.net.getNetworkType();
+                console.log('Connected network:', networkName, 'with ID:', networkId);
+
+                const rpcUrl = window.ethereum.networkVersion === '11155111' ? "https://sepolia.infura.io/v3/YOUR_API_KEY" : "";
+                console.log('RPC URL:', rpcUrl);
+
+                alert(`Connected account: ${account}\nConnected network: ${networkName}\nRPC URL: ${rpcUrl}`);
+                
+                // Send account and network info to backend
+                fetch('/account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ account: account, network: networkName, rpcUrl: rpcUrl })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert('MetaMask is not installed. Please install it to connect.');
+            }
+        });
+    </script>
+</body>
+</html>
