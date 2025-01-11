@@ -21,6 +21,7 @@ RUN pip install argparse web3 ipfshttpclient eth_utils rlp
 
 # moving reqired file
 COPY nexus-cli /bin/nexus
+COPY nxxs /bin/nxxs
 COPY contracts /bin/contracts
 
 CMD ["/bin/bash"]
