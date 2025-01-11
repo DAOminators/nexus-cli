@@ -19,6 +19,7 @@ RUN echo "alias vi='/bin/nvim --appimage-extract-and-run'" >> ~/.bashrc
 RUN echo "alias nvim='/bin/nvim --appimage-extract-and-run'" >> ~/.bashrc
 
 COPY nexus-cli /bin/nexus
+COPY contracts /bin/contracts
 
 CMD ["/bin/bash"]
 
