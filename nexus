@@ -64,18 +64,24 @@ elif command == 'default':
     print()
 
 elif command == 'run':
+
+    env_vars = {"WALLET_ID": from_account, "RPC_URL": rpc_url}
+    env_options = " ".join([f"--env {key}={value}" for key, value in env_vars.items()])
+
     print('Pulling image')
     # client.images.pull('docker.io/ankitprasad2005/nexus-connect', 'beta')
     # master, slave = pty.openpty()
     # container = client.containers.run('nexus-connect', command='/bin/bash', tty=True, stdin_open=True, detach=True, stdout=slave, stderr=slave)
     
-    # pull_command = ['docker', 'pull', 'docker.io/ankitprasad2005/nexus-connect:beta']
-    # subprocess.run(pull_command)
-    run_command = ['docker', 'run', '-d', '-p', '8080:8080', '--name', 'nexus-connect', 'nexus-connect']
-    container_id = subprocess.run(run_command, capture_output=True, text=True)
+    pull_command = ['docker', 'pull', 'docker.io/ankitprasad2005/nexus-connect:latest']
+    subprocess.run(pull_command)
+    # run_command = ['docker', 'run', '-d', '-p', '8080:8080', '--name', 'nexus-connect', 'nexus-connect']
+    # container_id = subprocess.run(run_command, capture_output=True, text=True)
     # attach_command = ['alacritty', '-e', 'sh', '-c', 'docker run --rm -p 8080:8080 -it nexus-connect /bin/bash; exec bash']
-    # subprocess.run(attach_command)
-    print(f'Container ID: {container_id}')
+    # container_id = subprocess.run(attach_command, capture_output=True, text=True)
+    # print(f'Container ID: {container_id}')
+    attach_command = f"alacritty -e sh -c 'docker run --rm -p 8080:8080 -it {env_options} nexus-connect /bin/bash; exec bash'"
+    container_id = subprocess.run(attach_command, shell=True, capture_output=True, text=True)
 
     print('Command executed')
     sys.exit(0)
