@@ -17,13 +17,13 @@ def abort(msg=None):
 def ensure_repo(repo):
     if not repo:
         abort('A repository address is mandatory for this operation')
-    if not Web3.isAddress(repo):
+    if not Web3.is_address(repo):
         abort('Invalid repository address')
 
 def ensure_account(account):
     if not account:
         abort('An account is mandatory for this operation')
-    if not Web3.isAddress(account):
+    if not Web3.is_address(account):
         abort('Invalid account')
 
 # Repo class implementation
@@ -141,7 +141,7 @@ parser = argparse.ArgumentParser(description='Nexus CLI')
 parser.add_argument('-R', '--repo', type=str, help='Repository address')
 parser.add_argument('--admin', action='store_true', help='Treat as administrator')
 parser.add_argument('--account', type=str, help='Sender account (a current administrator)')
-parser.add_argument('command', choices=['status', 'create', 'obsolete', 'authorize', 'deauthorize', 'login', 'default', 'commit'], help='Command to execute')
+parser.add_argument('command', choices=['status', 'create', 'obsolete', 'authorize', 'deauthorize', 'login', 'default', 'sync'], help='Command to execute')
 parser.add_argument('address', nargs='?', help='Address to authorize/deauthorize')
 
 args = parser.parse_args()
@@ -160,6 +160,7 @@ if command == 'login':
     sys.exit(0)
 
 web3 = Web3(Web3.HTTPProvider(rpc_url))
+print(web3.is_connected())
 
 if args.account:
     ensure_account(args.account)
@@ -177,7 +178,7 @@ with open(repo_bin_path) as f:
 if command == 'create':
     print(f'Creating new repository with administrator {from_account}')
     contract = web3.eth.contract(abi=repo_abi, bytecode=repo_code)
-    tx_hash = contract.constructor().transact({'from': from_account})
+    tx_hash = contract.constructor().transact()
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
     print(f'Repository created: {tx_receipt.contractAddress}')
 
@@ -226,13 +227,13 @@ elif command == 'deauthorize':
     tx_hash = contract.functions.deauthorize(args.address, args.admin).transact({'from': from_account})
     print(f'Sent transaction: {tx_hash.hex()}')
 
-elif command == 'commit':
-    print(f'Committing changes to repository {args.repo}')
+elif command == 'sync':
+    print(f'Sync changes to repository {args.repo}')
     ensure_repo(args.repo)
     repo = Repo(args.repo, from_account)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(repo.update())
-    print('Commit successful')
+    print('Sync successful')
 
 elif command == 'default':
     print(f'WALLET_ID: {from_account}')

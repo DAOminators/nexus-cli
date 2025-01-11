@@ -1,0 +1,16 @@
+FROM node:14-buster
+
+RUN apt-get update && apt-get install -y curl
+RUN curl -fsSL https://code-server.dev/install.sh | sh
+
+RUN apt install -y python python3-pip
+RUN pip3 install argparse web3 ipfshttpclient
+
+COPY nexus-cli /bin/nexus
+COPY settings.json /root/.local/share/code-server/User/settings.json
+
+WORKDIR /workspace
+
+EXPOSE 8080
+
+CMD ["code-server", "--host", "0.0.0.0", "--auth", "none", "/workspace"]

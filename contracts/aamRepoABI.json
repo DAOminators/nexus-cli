@@ -1,5 +1,80 @@
 [
 	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "CommitterUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "string",
+				"name": "ref",
+				"type": "string"
+			}
+		],
+		"name": "ReferenceDeleted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "string",
+				"name": "ref",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "hash",
+				"type": "string"
+			}
+		],
+		"name": "ReferenceUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "hash",
+				"type": "string"
+			}
+		],
+		"name": "SnapshotAdded",
+		"type": "event"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "string",
@@ -16,16 +91,48 @@
 		"inputs": [
 			{
 				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "committers",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
 				"name": "concerning",
 				"type": "address"
 			},
 			{
-				"internalType": "enum MangoRepo.ProposalType",
-				"name": "proposalType",
+				"internalType": "enum GigaRepo.Proposals",
+				"name": "Type",
 				"type": "uint8"
 			}
 		],
-		"name": "createProposal",
+		"name": "createAdminProposal",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "idea",
+				"type": "string"
+			}
+		],
+		"name": "createIdeaProposal",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -44,154 +151,36 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "proposalId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "concerning",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "enum MangoRepo.ProposalType",
-				"name": "proposalType",
-				"type": "uint8"
-			}
-		],
-		"name": "ProposalCreated",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "proposalId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "concerning",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "enum MangoRepo.ProposalType",
-				"name": "proposalType",
-				"type": "uint8"
-			}
-		],
-		"name": "ProposalExecuted",
-		"type": "event"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "proposalId",
+				"name": "taskId",
 				"type": "uint256"
 			}
 		],
-		"name": "removeVote",
+		"name": "denominateTask",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
 		"inputs": [],
-		"name": "setObsolete",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
+		"name": "getAllProposals",
+		"outputs": [
 			{
-				"internalType": "string",
-				"name": "ref",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "hash",
-				"type": "string"
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
 			}
 		],
-		"name": "setRef",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "proposalId",
-				"type": "uint256"
-			}
-		],
-		"name": "vote",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "proposalId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "voter",
-				"type": "address"
-			}
-		],
-		"name": "VoteRemoved",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "proposalId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "voter",
-				"type": "address"
-			}
-		],
-		"name": "Voted",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "proposalId",
+				"name": "propID",
 				"type": "uint256"
 			}
 		],
@@ -203,19 +192,24 @@
 				"type": "address"
 			},
 			{
-				"internalType": "enum MangoRepo.ProposalType",
-				"name": "proposalType",
+				"internalType": "enum GigaRepo.Proposals",
+				"name": "proptype",
 				"type": "uint8"
 			},
 			{
-				"internalType": "uint8",
+				"internalType": "uint256",
 				"name": "voteCount",
-				"type": "uint8"
+				"type": "uint256"
 			},
 			{
 				"internalType": "bool",
 				"name": "executed",
 				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "idea",
+				"type": "string"
 			}
 		],
 		"stateMutability": "view",
@@ -233,7 +227,7 @@
 		"outputs": [
 			{
 				"internalType": "string",
-				"name": "hash",
+				"name": "",
 				"type": "string"
 			}
 		],
@@ -260,19 +254,35 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "proposalId",
-				"type": "uint256"
-			}
-		],
-		"name": "getVoteCount",
+		"inputs": [],
+		"name": "getUserTasks",
 		"outputs": [
 			{
-				"internalType": "uint8",
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "startTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string[]",
+						"name": "accessRefs",
+						"type": "string[]"
+					}
+				],
+				"internalType": "struct GigaRepo.Task[]",
 				"name": "",
-				"type": "uint8"
+				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",
@@ -301,21 +311,16 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "proposalId",
+				"name": "",
 				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "voter",
-				"type": "address"
 			}
 		],
-		"name": "hasVoted",
+		"name": "idea_list",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"internalType": "string",
 				"name": "",
-				"type": "bool"
+				"type": "string"
 			}
 		],
 		"stateMutability": "view",
@@ -338,11 +343,95 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
+				"name": "taskId",
+				"type": "uint256"
+			}
+		],
+		"name": "nominateTask",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "numCommitters",
+		"outputs": [
+			{
+				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
-		"name": "proposals",
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "numProposals",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "numTasks",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "obsolete",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "proposalIDs",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "proposal_list",
 		"outputs": [
 			{
 				"internalType": "address",
@@ -350,14 +439,14 @@
 				"type": "address"
 			},
 			{
-				"internalType": "enum MangoRepo.ProposalType",
-				"name": "proposalType",
+				"internalType": "enum GigaRepo.Proposals",
+				"name": "proptype",
 				"type": "uint8"
 			},
 			{
-				"internalType": "uint8",
+				"internalType": "uint256",
 				"name": "voteCount",
-				"type": "uint8"
+				"type": "uint256"
 			},
 			{
 				"internalType": "bool",
@@ -385,6 +474,25 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "refKeys",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
 				"name": "index",
 				"type": "uint256"
 			}
@@ -393,7 +501,7 @@
 		"outputs": [
 			{
 				"internalType": "string",
-				"name": "ref",
+				"name": "",
 				"type": "string"
 			}
 		],
@@ -401,16 +509,66 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "refs",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "proposalId",
+				"type": "uint256"
+			}
+		],
+		"name": "removeVote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "repoInterfaceVersion",
 		"outputs": [
 			{
-				"internalType": "uint8",
-				"name": "version",
-				"type": "uint8"
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "ref",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "hash",
+				"type": "string"
+			}
+		],
+		"name": "setRef",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -424,6 +582,110 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "snapshots",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "taskIDs",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "tasks_list",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "deadline",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "userTasks",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "proposalId",
+				"type": "uint256"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]

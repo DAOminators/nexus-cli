@@ -1,0 +1,21 @@
+{
+    "workbench.colorTheme": "Default Dark+",
+    "workbench.startupEditor": "none",
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "/bin/bash"
+        }
+    },
+    "terminal.integrated.showTabs": false,
+    "terminal.integrated.splitCwd": "workspaceRoot",
+    "terminal.integrated.env.linux": {
+        "TERM": "xterm-256color"
+    },
+    "terminal.integrated.shellArgs.linux": [
+        "-l"
+    ],
+    "window.restoreWindows": "one",
+    "window.openFoldersInNewWindow": "default"
+}

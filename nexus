@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+import sys
+import json
+from web3 import Web3
+import argparse
+import os
+import docker
+import pty
+import subprocess
+
+client = docker.from_env()
+
+def abort(msg=None):
+    print(msg or 'Error occurred')
+    sys.exit(1)
+
+def ensure_repo(repo):
+    if not repo:
+        abort('A repository address is mandatory for this operation')
+    if not Web3.is_address(repo):
+        abort('Invalid repository address')
+
+def ensure_account(account):
+    if not account:
+        abort('An account is mandatory for this operation')
+    if not Web3.is_address(account):
+        abort('Invalid account')
+
+print('Initialising...')
+
+parser = argparse.ArgumentParser(description='Nexus connect CLI')
+parser.add_argument('--account', type=str, help='Sender account (a current administrator)')
+parser.add_argument('command', choices=['default', 'login', 'run'], help='Command to execute')
+
+args = parser.parse_args()
+command = args.command
+
+from_account = os.environ.get('WALLET_ID')
+rpc_url = os.environ.get('RPC_URL')
+
+web3 = Web3(Web3.HTTPProvider(rpc_url))
+if web3.is_connected():
+    print('Connected to RPC')
+    print()
+else:
+    print('Failed to connect to RPC')
+    print()
+    sys.exit(1)
+
+if command == 'login':
+    from_account = input('Enter your wallet ID: ')
+    rpc_url = input('Enter your RPC URL: ')
+    os.environ['WALLET_ID'] = from_account
+    os.environ['RPC_URL'] = rpc_url
+    web3.is_connected()
+    print('Login successful')
+    sys.exit(0)
+
+elif command == 'default':
+    print('Default saved crudentials')
+    print(f'WALLET_ID: {from_account}')
+    print(f'RPC_URL: {rpc_url}')
+    print()
+
+elif command == 'run':
+    print('Pulling image')
+    # client.images.pull('docker.io/ankitprasad2005/nexus-connect', 'beta')
+    # master, slave = pty.openpty()
+    # container = client.containers.run('nexus-connect', command='/bin/bash', tty=True, stdin_open=True, detach=True, stdout=slave, stderr=slave)
+    
+    # pull_command = ['docker', 'pull', 'docker.io/ankitprasad2005/nexus-connect:beta']
+    # subprocess.run(pull_command)
+    run_command = ['docker', 'run', '-d', '-p', '8080:8080', '--name', 'nexus-connect', 'nexus-connect']
+    container_id = subprocess.run(run_command, capture_output=True, text=True)
+    # attach_command = ['alacritty', '-e', 'sh', '-c', 'docker run --rm -p 8080:8080 -it nexus-connect /bin/bash; exec bash']
+    # subprocess.run(attach_command)
+    print(f'Container ID: {container_id}')
+
+    print('Command executed')
+    sys.exit(0)
+
