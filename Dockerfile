@@ -3,8 +3,6 @@ FROM python:3.11-slim
 RUN apt-get update
 RUN apt-get install -y curl
 
-RUN pip install argparse web3 ipfshttpclient
-
 # installing stratvim
 RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 RUN chmod u+x nvim.appimage
@@ -18,6 +16,10 @@ RUN echo "alias vim='/bin/nvim --appimage-extract-and-run'" >> ~/.bashrc
 RUN echo "alias vi='/bin/nvim --appimage-extract-and-run'" >> ~/.bashrc
 RUN echo "alias nvim='/bin/nvim --appimage-extract-and-run'" >> ~/.bashrc
 
+#nexux-cli dependencies
+RUN pip install argparse web3 ipfshttpclient eth_utils rlp
+
+# moving reqired file
 COPY nexus-cli /bin/nexus
 COPY contracts /bin/contracts
 
