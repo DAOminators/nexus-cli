@@ -5,8 +5,10 @@ import json
 import os
 from web3 import Web3
 import argparse
-import subprocess
-#from dotenv import load_dotenv
+import asyncio
+import ipfshttpclient
+import rlp
+import eth_utils
 
 def abort(msg=None):
     print(msg or 'Error occurred')
@@ -21,21 +23,125 @@ def ensure_repo(repo):
 def ensure_account(account):
     if not account:
         abort('An account is mandatory for this operation')
-    if not Web3.is_address(account):
+    if not Web3.isAddress(account):
         abort('Invalid account')
 
-print('Initialising...')
-#load_dotenv()
+# Repo class implementation
+class Repo:
+    def __init__(self, address, user=None):
+        self.web3 = Web3(Web3.HTTPProvider(os.getenv('ETHEREUM_RPC_URL', 'http://localhost:8545')))
+        self.user = user or self.web3.eth.coinbase
+        self.repo_contract = self.web3.eth.contract(address=address, abi=repo_abi)
 
-# web3 = Web3(Web3.HTTPProvider(os.getenv('ETHEREUM_RPC_URL', 'http://localhost:8545')))
-# if not web3.eth.default_account:
-#     web3.eth.default_account = web3.eth.coinbase
+        self._object_map = {}
+
+    async def git_hash(self, obj_type, data):
+        hasher = eth_utils.crypto.keccak()
+        hasher.update(f'{obj_type} {len(data)}\0'.encode())
+        hasher.update(data)
+        return hasher.hexdigest()
+
+    async def ipfs_put(self, buf):
+        async with ipfshttpclient.connect() as client:
+            result = await client.object.put(buf)
+            return result['Hash']
+
+    async def ipfs_get(self, key):
+        async with ipfshttpclient.connect() as client:
+            result = await client.object.get(key)
+            return result['Data']
+
+    async def _load_object_map(self):
+        snapshots = await self.snapshot_get_all()
+        for item in snapshots:
+            data = await self.ipfs_get(item)
+            self._object_map.update(snapshot.parse(data))
+
+    async def _ensure_object_map(self):
+        if not self._object_map:
+            await self._load_object_map()
+
+    async def snapshot_add(self, hash_val):
+        await self.repo_contract.functions.addSnapshot(hash_val).transact({'from': self.user})
+
+    async def snapshot_get_all(self):
+        count = await self.repo_contract.functions.snapshotCount().call()
+        snapshots = [await self.repo_contract.functions.getSnapshot(i).call() for i in range(count)]
+        return snapshots
+
+    async def contract_get_ref(self, ref):
+        return await self.repo_contract.functions.getRef(ref).call()
+
+    async def contract_set_ref(self, ref, hash_val):
+        await self.repo_contract.functions.setRef(ref, hash_val).transact({'from': self.user})
+
+    async def contract_all_refs(self):
+        refcount = await self.repo_contract.functions.refCount().call()
+        refs = {}
+        for i in range(refcount):
+            key = await self.repo_contract.functions.refName(i).call()
+            refs[key] = await self.repo_contract.functions.getRef(key).call()
+        return refs
+
+    async def refs(self, prefix=''):
+        await self._ensure_object_map()
+        refs = await self.contract_all_refs()
+        for ref_name, ref_hash in refs.items():
+            yield {'name': ref_name, 'hash': ref_hash}
+
+    async def symrefs(self):
+        yield {'name': 'HEAD', 'ref': 'refs/heads/master'}
+
+    async def has_object(self, hash_val):
+        await self._ensure_object_map()
+        return hash_val in self._object_map
+
+    async def get_object(self, hash_val):
+        await self._ensure_object_map()
+        if hash_val not in self._object_map:
+            raise ValueError(f'Object not present with key {hash_val}')
+        data = await self.ipfs_get(self._object_map[hash_val])
+        res = rlp.decode(data)
+        return {'type': res[0].decode(), 'length': int(res[1]), 'read': res[2]}
+
+    async def update(self, read_ref_updates=None, read_objects=None):
+        if read_objects:
+            while True:
+                try:
+                    async for object_data in read_objects():
+                        buf = b''.join(object_data['read'])
+                        hash_val = await self.git_hash(object_data['type'], buf)
+                        data = rlp.encode([object_data['type'].encode(), str(object_data['length']).encode(), buf])
+                        ipfs_hash = await self.ipfs_put(data)
+                        self._object_map[hash_val] = ipfs_hash
+                except StopAsyncIteration:
+                    snapshot_data = snapshot.create(self._object_map)
+                    ipfs_hash = await self.ipfs_put(snapshot_data)
+                    await self.snapshot_add(ipfs_hash)
+                    break
+
+        if read_ref_updates:
+            while True:
+                try:
+                    async for update in read_ref_updates():
+                        ref = await self.contract_get_ref(update['name'])
+                        if update['old'] != ref:
+                            raise ValueError(f'Ref update old value is incorrect. Ref: {update["name"]}, old in update: {update["old"]}, old in repo: {ref}')
+                        if update['new']:
+                            await self.contract_set_ref(update['name'], update['new'])
+                        else:
+                            await self.repo_contract.functions.deleteRef(update['name']).transact({'from': self.user})
+                except StopAsyncIteration:
+                    break
+
+# Initialize script
+print('Initialising...')
 
 parser = argparse.ArgumentParser(description='Nexus CLI')
 parser.add_argument('-R', '--repo', type=str, help='Repository address')
 parser.add_argument('--admin', action='store_true', help='Treat as administrator')
 parser.add_argument('--account', type=str, help='Sender account (a current administrator)')
-parser.add_argument('command', choices=['status', 'create', 'obsolete', 'authorize', 'deauthorize', 'login', 'default'], help='Command to execute')
+parser.add_argument('command', choices=['status', 'create', 'obsolete', 'authorize', 'deauthorize', 'login', 'default', 'commit'], help='Command to execute')
 parser.add_argument('address', nargs='?', help='Address to authorize/deauthorize')
 
 args = parser.parse_args()
@@ -59,8 +165,8 @@ if args.account:
     ensure_account(args.account)
     from_account = args.account
 
-repo_abi_path = os.path.join(os.path.dirname(__file__), 'contracts', 'MangoRepoABI.json')
-repo_bin_path = os.path.join(os.path.dirname(__file__), 'contracts', 'MangoRepo.bin')
+repo_abi_path = os.path.join(os.path.dirname(__file__), 'contracts', 'aamRepoABI.json')
+repo_bin_path = os.path.join(os.path.dirname(__file__), 'contracts', 'aamRepo.bin')
 
 with open(repo_abi_path) as f:
     repo_abi = json.load(f)
@@ -72,7 +178,7 @@ if command == 'create':
     print(f'Creating new repository with administrator {from_account}')
     contract = web3.eth.contract(abi=repo_abi, bytecode=repo_code)
     tx_hash = contract.constructor().transact({'from': from_account})
-    tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
     print(f'Repository created: {tx_receipt.contractAddress}')
 
 elif command == 'status':
@@ -120,10 +226,14 @@ elif command == 'deauthorize':
     tx_hash = contract.functions.deauthorize(args.address, args.admin).transact({'from': from_account})
     print(f'Sent transaction: {tx_hash.hex()}')
 
+elif command == 'commit':
+    print(f'Committing changes to repository {args.repo}')
+    ensure_repo(args.repo)
+    repo = Repo(args.repo, from_account)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(repo.update())
+    print('Commit successful')
+
 elif command == 'default':
     print(f'WALLET_ID: {from_account}')
     print(f'RPC_URL: {rpc_url}')
-
-else:
-    print("INVALID COMMAND")
-    parser.print_help()
